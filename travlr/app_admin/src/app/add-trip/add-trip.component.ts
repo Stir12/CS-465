@@ -1,49 +1,32 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { AuthenticationService } from '../services/authentication.service';
 import { TripDataService } from '../services/trip-data.service';
+import { Trip } from '../models/trip';
 
 @Component({
-  selector: 'app-trip-add',
-  templateUrl: './trip-add.component.html',
-  styleUrls: ['./trip-add.component.css'],
+  selector: 'app-trip-list',
+  templateUrl: './trip-list.component.html',
+  styleUrls: ['./trip-list.component.css'],
 })
-export class TripAddComponent implements OnInit {
-  addTripFormGroup!: FormGroup;
-  submitted = false;
+export class TripListComponent implements OnInit {
+  trips: Trip[] = [];
 
   constructor(
-    private formBuilder: FormBuilder,
-    private router: Router,
-    private tripService: TripDataService
+    private tripService: TripDataService,
+    private authenticationService: AuthenticationService
   ) {}
 
   ngOnInit() {
-    this.addTripFormGroup = this.formBuilder.group({
-      _id: [],
-      code: ['', Validators.required],
-      name: ['', Validators.required],
-      length: ['', Validators.required],
-      start: ['', Validators.required],
-      resort: ['', Validators.required],
-      perPerson: ['', Validators.required],
-      image: ['', Validators.required],
-      description: ['', Validators.required],
+    this.getTrips();
+  }
+
+  getTrips() {
+    this.tripService.getTrips().then((data) => {
+      this.trips = data;
     });
   }
 
-  onSubmit() {
-    console.log('TripAddComponent#onSubmit calling TripDataService#addTrip');
-    this.submitted = true;
-    if (this.addTripFormGroup.valid) {
-      this.tripService.addTrip(this.addTripFormGroup.value).then((data) => {
-        console.log('TripAddComponent#onSubmit data', data);
-        this.router.navigate(['']);
-      });
-    }
-  }
-
-  get f() {
-    return this.addTripFormGroup.controls;
+  public isLoggedIn(): boolean {
+    return this.authenticationService.isLoggedIn();
   }
 }
